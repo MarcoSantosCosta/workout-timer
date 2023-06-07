@@ -4,51 +4,44 @@ import { StyleSheet, Text, View, TouchableOpacity, Vibration } from 'react-nativ
 export default function Counter(props) {
 
   const timerRef = useRef();
-  const [timer, setTimer] = useState(0);
-  const [rest, setRest] = useState(0);
-
-  useEffect(() => {
-    aux = props.restTime.split(':');
-    restInSecond = parseInt(aux[0]) * 60 + parseInt(aux[1]);
-    setRest(restInSecond);
-    setTimer(restInSecond);
-  }, [])
+  const [rest, setRest] = useState(5);
+  const [timer, setTimer] = useState(rest);
+  const [status, setStatus] = useState();
 
 
   const updateTime = (start) => {
     let now = new Date();
-    aux = restInSecond - ((now - start) / 1000);
+    aux = rest - ((now - start) / 1000);
     if (aux >= 0) {
       setTimer(aux);
     } else {
+      setStatus('inTraining')
       clearInterval(timerRef.current);
-      Vibration.vibrate([200,200,200,200], true)
+      Vibration.vibrate([200, 200, 200, 200], true)
+      setTimeout(() => Vibration.cancel(), 7000)
     }
   }
 
   const start = () => {
-    console.log("Start");
+    setStatus('inRest')
     let start = new Date();
+    clearInterval(timerRef.current);
     timerRef.current = setInterval(() => updateTime(start), 500);
   }
 
   const stop = () => {
     Vibration.cancel()
+    setStatus('inTraining')
     clearInterval(timerRef.current);
     setTimer(0);
     console.log("Stop");
   }
 
-  const pause = () => {
-    clearInterval(timerRef.current);
-    console.log("Pause");
-  }
-
   return (
     <View style={styles.all}>
-      <Text>{rest.toFixed(0)}</Text>
+      <Text>{status}</Text>
       <View style={styles.timeContainer}>
-        <Text style={styles.timeText}> {timer.toFixed(0)}</Text>
+        <Text style={styles.timeText}> {timer}</Text>
       </View>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity onPress={start}>
@@ -57,9 +50,6 @@ export default function Counter(props) {
         <TouchableOpacity onPress={stop}>
           <Text>Stop</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={pause}>
-          <Text>Pause</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -67,11 +57,10 @@ export default function Counter(props) {
 
 const styles = StyleSheet.create({
   all: {
-    paddingTop: 100
-
+    width: "100%",
+    backgroundColor: "red"
   },
   timeContainer: {
-    width: 300,
     alignItems: 'center',
     marginBottom: 15
   },
@@ -82,9 +71,7 @@ const styles = StyleSheet.create({
   },
 
   buttonsContainer: {
-    flex: 1,
-    width: 300,
     flexDirection: "row",
-    justifyContent: 'space-between'
+    justifyContent: 'space-around'
   }
 })
