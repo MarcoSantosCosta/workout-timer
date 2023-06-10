@@ -4,14 +4,29 @@ import { StyleSheet, Text, View, TouchableOpacity, Vibration } from 'react-nativ
 export default function Counter(props) {
 
   const timerRef = useRef();
-  const [rest, setRest] = useState(5);
-  const [timer, setTimer] = useState(rest);
+  const [rest, setRest] = useState();
+  const [timer, setTimer] = useState();
   const [status, setStatus] = useState();
 
 
+  useEffect(() => {
+    console.log(props);
+    setRest(props.restTime);
+    setTimer(props.restTime);
+  }, [props.restTime]);
+
+  const secondsToString = (timeInSeconds) => {
+    let minutes = Math.floor((timeInSeconds / 60));
+    console.log('Total Time:' + timeInSeconds);
+    console.log("Minutes: "+minutes);
+    let seconds = (timeInSeconds - (minutes * 60));
+    return minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+
+  };
+
   const updateTime = (start) => {
     let now = new Date();
-    aux = rest - ((now - start) / 1000);
+    aux = Math.ceil(rest - ((now - start) / 1000));
     if (aux >= 0) {
       setTimer(aux);
     } else {
@@ -20,28 +35,30 @@ export default function Counter(props) {
       Vibration.vibrate([200, 200, 200, 200], true)
       setTimeout(() => Vibration.cancel(), 7000)
     }
-  }
+  };
 
   const start = () => {
     setStatus('inRest')
+    setTimer(rest)
     let start = new Date();
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => updateTime(start), 500);
-  }
+  };
 
   const stop = () => {
     Vibration.cancel()
     setStatus('inTraining')
     clearInterval(timerRef.current);
-    setTimer(0);
+    setTimer(rest);
     console.log("Stop");
-  }
+  };
 
   return (
     <View style={styles.all}>
+
       <Text>{status}</Text>
       <View style={styles.timeContainer}>
-        <Text style={styles.timeText}> {timer}</Text>
+        <Text style={styles.timeText}> {secondsToString(timer)}</Text>
       </View>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity onPress={start}>
